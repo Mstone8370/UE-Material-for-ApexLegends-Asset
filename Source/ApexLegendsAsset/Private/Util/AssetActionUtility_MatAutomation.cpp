@@ -72,7 +72,7 @@ void UAssetActionUtility_MatAutomation::AutoTextureMapping(FString TextureFolder
         }
 
         // Map Textures
-        MapTextures(MaterialTypeMap, TextureFolderPath);
+        MapTexturesToMaterial(MaterialTypeMap, TextureFolderPath);
     }
 }
 
@@ -168,7 +168,7 @@ UMaterialInstanceConstant* UAssetActionUtility_MatAutomation::CreateMaterialInst
     return MaterialInstanceAsset;
 }
 
-void UAssetActionUtility_MatAutomation::MapTextures(TMap<FString, UMaterialInstance*>& InMaterialTypeMap, FString TextureFolderPath)
+void UAssetActionUtility_MatAutomation::MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialTypeMap, FString TextureFolderPath)
 {
     // Get Textures
     UObjectLibrary* ObjectLibrary = UObjectLibrary::CreateLibrary(nullptr, false, GIsEditor);
@@ -204,9 +204,9 @@ void UAssetActionUtility_MatAutomation::MapTextures(TMap<FString, UMaterialInsta
         }
         if (TextureType == TEXT("NormalTexture"))
         {
+            Texture->SRGB = 0;
             Texture->LODGroup = TextureGroup::TEXTUREGROUP_WorldNormalMap;
             Texture->CompressionSettings = TextureCompressionSettings::TC_Normalmap;
-            Texture->SRGB = 0;
         }
 
         // Save texture

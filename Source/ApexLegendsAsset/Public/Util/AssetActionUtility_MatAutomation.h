@@ -21,17 +21,17 @@ public:
 	UAssetActionUtility_MatAutomation();
 
 	UFUNCTION(CallInEditor)
-	void AutoTextureMapping(FString TextureFolderNameOverride);
+	void AutoTextureMapping(UPARAM(DisplayName = "Custom Texture Folder") FString TextureFolderNameOverride);
 
 protected:
 	/**
-	* Read SkeletalMesh's materials info, find existing Material Instance or create new Material Instance and set.
+	* Read SkeletalMesh's materials info, find existing Material Instance or create new Material Instance, and set.
 	*/
 	void SetMaterialInstances(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialTypeMap);
 
 	UMaterialInstanceConstant* CreateMaterialInstance(UMaterialInterface* ParentMaterial, FString FullPath);
 
-	void MapTextures(TMap<FString, UMaterialInstance*>& InMaterialTypeMap, FString TextureFolderPath);
+	void MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialTypeMap, FString TextureFolderPath);
 
 	UPROPERTY(EditAnywhere)
 	FString MasterMaterialPath;
