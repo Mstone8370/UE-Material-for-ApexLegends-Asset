@@ -16,8 +16,8 @@
 //#include "MaterialUtilities.h"
 
 UAssetActionUtility_MatAutomation::UAssetActionUtility_MatAutomation()
-    : MasterMaterialPath(TEXT("/Game/ApexMaterials/M_Master_Opaque_Subsurface"))
-    , EyeCorneaMaterialPath(TEXT("/Game/ApexMaterials/MI_eyecornea"))
+    : MasterMaterialPath(TEXT("/Game/ApexMaterials/M_Master_AlphaMask_Subsurface"))
+    , EyeCorneaMaterialPath(TEXT("/Game/ApexMaterials/MI_eyecornea_raytracing"))
     , EyeShadowMaterialPath(TEXT("/Game/ApexMaterials/MI_wraith_base_eyeshadow"))
     , DefaultTextureFolderName(TEXT("Textures"))
 {
