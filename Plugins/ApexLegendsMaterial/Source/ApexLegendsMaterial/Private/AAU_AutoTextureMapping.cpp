@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2024 Minseok Kim
 
 
 #include "AAU_AutoTextureMapping.h"
@@ -16,7 +16,7 @@
 UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     : DefaultTextureFolderName(TEXT("Textures"))
     , MasterMaterialPath(TEXT("/ApexLegendsMaterial/Materials/M_Master_AlphaMask_Subsurface"))
-    , EyeCorneaMaterialPath(TEXT("/ApexLegendsMaterial/Materials/MI_eyecornea_raytracing"))
+    , EyeCorneaMaterialPath(TEXT("/ApexLegendsMaterial/Materials/MI_eyecornea"))
     , EyeShadowMaterialPath(TEXT("/ApexLegendsMaterial/Materials/MI_eyeshadow"))
     , MasterMaterialOverride(nullptr)
     , EyeCorneaMaterialOverride(nullptr)
@@ -114,11 +114,19 @@ bool UAAU_AutoTextureMapping::SetMaterialInstances(USkeletalMesh* SkeletalMesh, 
             // Create New Material Instance
             const FString NewMaterialInstanceName = FString("MI_") + MaterialSlotName.ToString();
             const FString BasePath = FPaths::GetPath(SkeletalMesh->GetPathName());
+            const FString MaterialInstanceFullPath = FPaths::ConvertRelativePathToFull(BasePath, NewMaterialInstanceName);
 
-            MaterialInstance = CreateMaterialInstance(
-                MasterMaterial,
-                FPaths::ConvertRelativePathToFull(BasePath, NewMaterialInstanceName)
-            );
+            if (UEditorAssetLibrary::DoesAssetExist(MaterialInstanceFullPath))
+            {
+                MaterialInstance = Cast<UMaterialInstance>(UEditorAssetLibrary::LoadAsset(MaterialInstanceFullPath));
+            }
+            else
+            {
+                MaterialInstance = CreateMaterialInstance(
+                    MasterMaterial,
+                    MaterialInstanceFullPath
+                );
+            }
 
             if (!MaterialInstance)
             {
@@ -250,7 +258,7 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
 
         // Load Texture
         UTexture2D* Texture = Cast<UTexture2D>(UEditorAssetLibrary::LoadAsset(TextureAssetFilePath));
-        if (LinearTextureTypes.Contains(TextureType))
+        if (LinearTextureTypes.Contains(TextureType) && Texture->SRGB > 0)
         {
             Texture->SRGB = 0;
             if (TextureType == TEXT("NormalTexture"))
