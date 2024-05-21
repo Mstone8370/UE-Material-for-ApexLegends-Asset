@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Util/AssetActionUtility_MatAutomation.h"
+#include "AAU_AutoTextureMapping.h"
 
 #include "Engine/SkinnedAssetCommon.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -13,7 +13,7 @@
 #include "UObject/SavePackage.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 
-UAssetActionUtility_MatAutomation::UAssetActionUtility_MatAutomation()
+UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     : DefaultTextureFolderName(TEXT("Textures"))
     , MasterMaterialPath(TEXT("/ApexLegendsMaterial/Materials/M_Master_AlphaMask_Subsurface"))
     , EyeCorneaMaterialPath(TEXT("/ApexLegendsMaterial/Materials/MI_eyecornea_raytracing"))
@@ -45,7 +45,7 @@ UAssetActionUtility_MatAutomation::UAssetActionUtility_MatAutomation()
     LinearTextureTypes.Add(TEXT("normalTexture"));
 }
 
-void UAssetActionUtility_MatAutomation::AutoTextureMapping(FString TextureFolderNameOverride)
+void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverride)
 {
     TArray<FAssetData> SelectedAssetDatas = UEditorUtilityLibrary::GetSelectedAssetData();
     for (FAssetData& SelectedAssetData : SelectedAssetDatas)
@@ -81,7 +81,7 @@ void UAssetActionUtility_MatAutomation::AutoTextureMapping(FString TextureFolder
     }
 }
 
-bool UAssetActionUtility_MatAutomation::SetMaterialInstances(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialTypeMap)
+bool UAAU_AutoTextureMapping::SetMaterialInstances(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialTypeMap)
 {
     // Load Essential Materials
     UMaterialInterface* MasterMaterial = nullptr;
@@ -145,7 +145,7 @@ bool UAssetActionUtility_MatAutomation::SetMaterialInstances(USkeletalMesh* Skel
     return true;
 }
 
-bool UAssetActionUtility_MatAutomation::LoadEssentialMaterials(UMaterialInterface*& OutMasterMaterial, UMaterialInterface*& OutEyeCorneaMaterial, UMaterialInterface*& OutEyeShadowMaterial)
+bool UAAU_AutoTextureMapping::LoadEssentialMaterials(UMaterialInterface*& OutMasterMaterial, UMaterialInterface*& OutEyeCorneaMaterial, UMaterialInterface*& OutEyeShadowMaterial)
 {
     OutMasterMaterial = MasterMaterialOverride;
     if (!OutMasterMaterial)
@@ -183,7 +183,7 @@ bool UAssetActionUtility_MatAutomation::LoadEssentialMaterials(UMaterialInterfac
     return true;
 }
 
-UMaterialInstanceConstant* UAssetActionUtility_MatAutomation::CreateMaterialInstance(UMaterialInterface* ParentMaterial, FString FullPath)
+UMaterialInstanceConstant* UAAU_AutoTextureMapping::CreateMaterialInstance(UMaterialInterface* ParentMaterial, FString FullPath)
 {
     UPackage* Package = CreatePackage(*FullPath);
     Package->FullyLoad();
@@ -219,7 +219,7 @@ UMaterialInstanceConstant* UAssetActionUtility_MatAutomation::CreateMaterialInst
     return MaterialInstanceAsset;
 }
 
-void UAssetActionUtility_MatAutomation::MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialTypeMap, FString TextureFolderPath)
+void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialTypeMap, FString TextureFolderPath)
 {
     // Get Textures
     UObjectLibrary* ObjectLibrary = UObjectLibrary::CreateLibrary(nullptr, false, GIsEditor);

@@ -4,23 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "AssetActionUtility.h"
-#include "AssetActionUtility_MatAutomation.generated.h"
+#include "AAU_AutoTextureMapping.generated.h"
 
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 
-/**
- * 
- */
 UCLASS()
-class APEXLEGENDSASSET_API UAssetActionUtility_MatAutomation : public UAssetActionUtility
+class APEXLEGENDSMATERIAL_API UAAU_AutoTextureMapping : public UAssetActionUtility
 {
 	GENERATED_BODY()
-	
-public:
-	UAssetActionUtility_MatAutomation();
 
-	UFUNCTION(CallInEditor, meta = (DisplayName = "[DEPRECATED] Auto Texture Mapping"))
+public:
+	UAAU_AutoTextureMapping();
+
+	UFUNCTION(CallInEditor, meta = (DisplayName = "[Apex Legends Material] Auto Texture Mapping"))
 	void AutoTextureMapping(UPARAM(DisplayName = "Custom Texture Folder") FString TextureFolderNameOverride);
 
 protected:

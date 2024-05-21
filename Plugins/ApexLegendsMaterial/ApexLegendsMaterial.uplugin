@@ -1,0 +1,33 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "ApexLegendsMaterial",
+	"Description": "Materials and Auto texture mapping tool for Apex Legends assets.",
+	"Category": "Other",
+	"CreatedBy": "mstone",
+	"CreatedByURL": "https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset",
+	"DocsURL": "https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "ApexLegendsMaterial",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		}
+	]
+}
