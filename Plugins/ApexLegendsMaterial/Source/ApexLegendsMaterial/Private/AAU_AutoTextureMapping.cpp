@@ -61,10 +61,10 @@ void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverri
         const FString TextureFolderName = TextureFolderNameOverride.Len() > 0 ? TextureFolderNameOverride : DefaultTextureFolderName;
         const FString TextureFolderPath = FPaths::ConvertRelativePathToFull(AssetFolderPath, TextureFolderName);
 
-        TMap<FString, UMaterialInstance*> MaterialTypeMap;
+        TMap<FString, UMaterialInstance*> MaterialNameMap;
 
         // Set Skeletal Mesh's materials
-        if (!SetMaterialInstances(SkeletalMesh, MaterialTypeMap))
+        if (!SetMaterialInstances(SkeletalMesh, MaterialNameMap))
         {
             continue;
         }
@@ -77,11 +77,11 @@ void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverri
         }
 
         // Map Textures
-        MapTexturesToMaterial(MaterialTypeMap, TextureFolderPath);
+        MapTexturesToMaterial(MaterialNameMap, TextureFolderPath);
     }
 }
 
-bool UAAU_AutoTextureMapping::SetMaterialInstances(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialTypeMap)
+bool UAAU_AutoTextureMapping::SetMaterialInstances(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
 {
     // Load Essential Materials
     UMaterialInterface* MasterMaterial = nullptr;
@@ -131,10 +131,7 @@ bool UAAU_AutoTextureMapping::SetMaterialInstances(USkeletalMesh* SkeletalMesh, 
         }
 
         // Add to map for texture mapping
-        TArray<FString> ParsedName;
-        MaterialSlotName.ToString().ParseIntoArray(ParsedName, TEXT("_"));
-        const FString MaterialType = ParsedName.Last();
-        OutMaterialTypeMap.Add(MaterialType, MaterialInstance);
+        OutMaterialNameMap.Add(MaterialSlotName.ToString(), MaterialInstance);
     }
 
     // Save Skeletal Mesh
@@ -219,7 +216,7 @@ UMaterialInstanceConstant* UAAU_AutoTextureMapping::CreateMaterialInstance(UMate
     return MaterialInstanceAsset;
 }
 
-void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialTypeMap, FString TextureFolderPath)
+void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialNameMap, FString TextureFolderPath)
 {
     // Get Textures
     UObjectLibrary* ObjectLibrary = UObjectLibrary::CreateLibrary(nullptr, false, GIsEditor);
@@ -236,14 +233,18 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
         const FString TextureAssetFilePath = FPaths::GetBaseFilename(TextureAssetObjectPath, false);
         const FString TextureAssetName = FPaths::GetBaseFilename(TextureAssetFilePath);
 
-        TArray<FString> ParsedName;
-        int32 ArrayNum = TextureAssetName.ParseIntoArray(ParsedName, TEXT("_"));
-        const FString TextureType = ParsedName.Last();
-        const FString MaterialType = ParsedName[ArrayNum - 2];
-
-        if (!InMaterialTypeMap.Contains(MaterialType))
+        FString MaterialName = TextureAssetName;
+        FString TextureType = "";
+        int32 DelimeterIndex;
+        if (TextureAssetName.FindLastChar('_', DelimeterIndex))
         {
-            UE_LOG(LogTemp, Warning, TEXT("[AutoTextureMapping] Material Not Found: %s"), *MaterialType);
+            MaterialName = TextureAssetName.Left(DelimeterIndex);
+            TextureType = TextureAssetName.RightChop(DelimeterIndex + 1);
+        }
+
+        if (!InMaterialNameMap.Contains(MaterialName))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("[AutoTextureMapping] Material Not Found: %s"), *MaterialName);
             continue;
         }
 
@@ -271,7 +272,7 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
             continue;
         }
 
-        UMaterialInstance* TargetMaterialInstance = *InMaterialTypeMap.Find(MaterialType);
+        UMaterialInstance* TargetMaterialInstance = *InMaterialNameMap.Find(MaterialName);
 
         FMaterialInstanceParameterUpdateContext Context(TargetMaterialInstance);
         FMaterialParameterInfo ParamInfo(*ParamName);
@@ -282,10 +283,10 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
 
     // Save Material Instances
     TArray<FString> MapKeys;
-    InMaterialTypeMap.GetKeys(MapKeys);
+    InMaterialNameMap.GetKeys(MapKeys);
     for (const FString& Key : MapKeys)
     {
-        if (UMaterialInstance* MatInst = *InMaterialTypeMap.Find(Key))
+        if (UMaterialInstance* MatInst = *InMaterialNameMap.Find(Key))
         {
             FString PathName = MatInst->GetPathName();
             UEditorAssetLibrary::SaveAsset(FPaths::GetBaseFilename(PathName, false), false);

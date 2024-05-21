@@ -24,13 +24,13 @@ protected:
 	/**
 	* Read SkeletalMesh's materials info, find existing Material Instance or create new Material Instance, and set.
 	*/
-	bool SetMaterialInstances(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialTypeMap);
+	bool SetMaterialInstances(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap);
 
 	bool LoadEssentialMaterials(UMaterialInterface*& OutMasterMaterial, UMaterialInterface*& OutEyeCorneaMaterial, UMaterialInterface*& OutEyeShadowMaterial);
 
 	UMaterialInstanceConstant* CreateMaterialInstance(UMaterialInterface* ParentMaterial, FString FullPath);
 
-	void MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialTypeMap, FString TextureFolderPath);
+	void MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialNameMap, FString TextureFolderPath);
 
 	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup")
 	FString DefaultTextureFolderName;
