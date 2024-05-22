@@ -12,12 +12,7 @@ public class ApexLegendsAsset : ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
-            "InputCore",
-            "UnrealEd",
-            "EditorScriptingUtilities",
-            "Blutility",
-            "AssetRegistry",
-            "MaterialUtilities"
+            "InputCore"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {  });
