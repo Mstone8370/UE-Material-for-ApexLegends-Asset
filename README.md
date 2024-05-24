@@ -42,6 +42,8 @@ This project's Unreal Engine version is ```5.3```
 
   - For those not using the Auto Texture Mapping tool: Make sure to uncheck sRGB for the AO, cavity, gloss, and alpha mask textures in their respective settings. Set the normal map's ```Texture Group``` to ```WorldNormalMap``` and ```Compression Settings``` to ```Normal map```.
 
+![mat_select](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/8f19c19e-59f3-4963-8fb2-24ea90db1bc7)
+
 * Auto Texture Mapping tool
 
 1. In the Skeletal Mesh's **Asset Details** pannel, disconnect all Materials if any are connected by default.
