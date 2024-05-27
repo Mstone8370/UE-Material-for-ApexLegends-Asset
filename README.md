@@ -1,3 +1,7 @@
+![main](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/e2b148e8-2442-4c6a-a16a-719ddd93dcd9)
+
+[Full resolution of render image](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/a56f4c9a-36ba-490d-9cf5-48f8502d537c)
+
 # Unreal Engine Material for Apex Legend Asset
 
 A repository for an Unreal Engine plugin containing materials for extracted Apex Legends assets and an auto texture mapping tool.
