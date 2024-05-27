@@ -50,8 +50,8 @@ void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverri
     TArray<FAssetData> SelectedAssetDatas = UEditorUtilityLibrary::GetSelectedAssetData();
     for (FAssetData& SelectedAssetData : SelectedAssetDatas)
     {
-        USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(SelectedAssetData.GetAsset());
-        if (!SkeletalMesh)
+        UObject* SelectedObject = SelectedAssetData.GetAsset();
+        if (!(SelectedObject->IsA<USkeletalMesh>() || SelectedObject->IsA<UStaticMesh>()))
         {
             continue;
         }
@@ -64,7 +64,7 @@ void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverri
         TMap<FString, UMaterialInstance*> MaterialNameMap;
 
         // Set Skeletal Mesh's materials
-        if (!SetMaterialInstances(SkeletalMesh, MaterialNameMap))
+        if (!SetMaterialInstances(SelectedObject, MaterialNameMap))
         {
             continue;
         }
@@ -81,7 +81,27 @@ void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverri
     }
 }
 
-bool UAAU_AutoTextureMapping::SetMaterialInstances(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
+bool UAAU_AutoTextureMapping::SetMaterialInstances(UObject* Object, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
+{
+    bool bRet = false;
+    if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(Object))
+    {
+        bRet = SetMaterialInstances_SkeletalMesh(SkeletalMesh, OutMaterialNameMap);
+    }
+    else if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(Object))
+    {
+        bRet = SetMaterialInstances_StaticMesh(StaticMesh, OutMaterialNameMap);
+    }
+
+    // Save Skeletal Mesh
+    const FString ObjectPath = Object->GetPathName();
+    const FString FilePath = FPaths::GetBaseFilename(ObjectPath, false);
+    UEditorAssetLibrary::SaveAsset(FilePath, false);
+
+    return bRet;
+}
+
+bool UAAU_AutoTextureMapping::SetMaterialInstances_SkeletalMesh(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
 {
     // Load Essential Materials
     UMaterialInterface* MasterMaterial = nullptr;
@@ -108,45 +128,74 @@ bool UAAU_AutoTextureMapping::SetMaterialInstances(USkeletalMesh* SkeletalMesh, 
             continue;
         }
 
-        UMaterialInstance* MaterialInstance = Cast<UMaterialInstance>(Material.MaterialInterface);
+        // Trying cast Material Interface to Material Instance. If failed, create new Material Instance.
+        UMaterialInterface* MaterialInterface = Material.MaterialInterface;
+        UMaterialInstance* MaterialInstance = CastOrCreateMaterialInstance(
+            MaterialInterface,
+            FPaths::GetPath(SkeletalMesh->GetPathName()),
+            MaterialSlotName.ToString(),
+            MasterMaterial
+        );
         if (!MaterialInstance)
         {
-            // Create New Material Instance
-            const FString NewMaterialInstanceName = FString("MI_") + MaterialSlotName.ToString();
-            const FString BasePath = FPaths::GetPath(SkeletalMesh->GetPathName());
-            const FString MaterialInstanceFullPath = FPaths::ConvertRelativePathToFull(BasePath, NewMaterialInstanceName);
-
-            if (UEditorAssetLibrary::DoesAssetExist(MaterialInstanceFullPath))
-            {
-                MaterialInstance = Cast<UMaterialInstance>(UEditorAssetLibrary::LoadAsset(MaterialInstanceFullPath));
-            }
-            else
-            {
-                MaterialInstance = CreateMaterialInstance(
-                    MasterMaterial,
-                    MaterialInstanceFullPath
-                );
-            }
-
-            if (!MaterialInstance)
-            {
-                UE_LOG(LogTemp, Error, TEXT("[AutoTextureMapping] Failed to create Material Instance: %s"), *NewMaterialInstanceName);
-                continue;
-            }
-
-            // Set Material as New Material Instance
-            Material.MaterialInterface = MaterialInstance;
+            continue;
         }
+
+        // Set Material for when a new Material Instance is created
+        Material.MaterialInterface = MaterialInstance;
 
         // Add to map for texture mapping
         OutMaterialNameMap.Add(MaterialSlotName.ToString(), MaterialInstance);
     }
+    return true;
+}
 
-    // Save Skeletal Mesh
-    const FString SkeletalMeshObjectPath = SkeletalMesh->GetPathName();
-    const FString SkeletalMeshPath = FPaths::GetBaseFilename(SkeletalMeshObjectPath, false);
-    UEditorAssetLibrary::SaveAsset(SkeletalMeshPath, false);
+bool UAAU_AutoTextureMapping::SetMaterialInstances_StaticMesh(UStaticMesh* StaticMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
+{
+    // Load Essential Materials
+    UMaterialInterface* MasterMaterial = nullptr;
+    UMaterialInterface* EyeCorneaMaterial = nullptr;
+    UMaterialInterface* EyeShadowMaterial = nullptr;
+    if (!LoadEssentialMaterials(MasterMaterial, EyeCorneaMaterial, EyeShadowMaterial))
+    {
+        return false;
+    }
 
+    // Set Material Instances
+    TArray<FStaticMaterial>& MaterialList = StaticMesh->GetStaticMaterials();
+    for (FStaticMaterial& Material : MaterialList)
+    {
+        FName MaterialSlotName = Material.MaterialSlotName;
+        if (MaterialSlotName.IsEqual(FName("wraith_base_eyecornea")))
+        {
+            Material.MaterialInterface = EyeCorneaMaterial;
+            continue;
+        }
+        if (MaterialSlotName.IsEqual(FName("wraith_base_eyeshadow")))
+        {
+            Material.MaterialInterface = EyeShadowMaterial;
+            continue;
+        }
+
+        // Trying cast Material Interface to Material Instance. If failed, create new Material Instance.
+        UMaterialInterface* MaterialInterface = Material.MaterialInterface;
+        UMaterialInstance* MaterialInstance = CastOrCreateMaterialInstance(
+            MaterialInterface,
+            FPaths::GetPath(StaticMesh->GetPathName()),
+            MaterialSlotName.ToString(),
+            MasterMaterial
+        );
+        if (!MaterialInstance)
+        {
+            continue;
+        }
+
+        // Set Material for when a new Material Instance is created
+        Material.MaterialInterface = MaterialInstance;
+
+        // Add to map for texture mapping
+        OutMaterialNameMap.Add(MaterialSlotName.ToString(), MaterialInstance);
+    }
     return true;
 }
 
@@ -186,6 +235,37 @@ bool UAAU_AutoTextureMapping::LoadEssentialMaterials(UMaterialInterface*& OutMas
     }
 
     return true;
+}
+
+UMaterialInstance* UAAU_AutoTextureMapping::CastOrCreateMaterialInstance(UMaterialInterface*& MaterialInterface, const FString& BasePath, const FString& MaterialSlotName, UMaterialInterface* ParentMaterial)
+{
+    UMaterialInstance* MaterialInstance = Cast<UMaterialInstance>(MaterialInterface);
+    if (!MaterialInstance)
+    {
+        // Create New Material Instance
+        const FString NewMaterialInstanceName = FString("MI_") + MaterialSlotName;
+        const FString MaterialInstanceFullPath = FPaths::ConvertRelativePathToFull(BasePath, NewMaterialInstanceName);
+
+        if (UEditorAssetLibrary::DoesAssetExist(MaterialInstanceFullPath))
+        {
+            MaterialInstance = Cast<UMaterialInstance>(UEditorAssetLibrary::LoadAsset(MaterialInstanceFullPath));
+        }
+        else
+        {
+            MaterialInstance = CreateMaterialInstance(
+                ParentMaterial,
+                MaterialInstanceFullPath
+            );
+        }
+
+        if (!MaterialInstance)
+        {
+            UE_LOG(LogTemp, Error, TEXT("[AutoTextureMapping] Failed to create Material Instance: %s"), *NewMaterialInstanceName);
+            return nullptr;
+        }
+    }
+
+    return MaterialInstance;
 }
 
 UMaterialInstanceConstant* UAAU_AutoTextureMapping::CreateMaterialInstance(UMaterialInterface* ParentMaterial, FString FullPath)
