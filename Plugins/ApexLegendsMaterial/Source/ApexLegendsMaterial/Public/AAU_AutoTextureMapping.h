@@ -22,18 +22,17 @@ public:
 
 protected:
 	/**
-	* Read SkeletalMesh's materials info, find existing Material Instance or create new Material Instance, and set.
+	* Read Mesh's materials info, find existing Material Instance or create new Material Instance, and set.
 	*/
-	bool SetMaterialInstances(UObject* Object, TMap<FString, UMaterialInstance*>& OutMaterialNameMap);
+	bool SetMaterialInstances(UObject* MeshObject, TMap<FString, UMaterialInstance*>& OutMaterialNameMap);
 
 	bool SetMaterialInstances_SkeletalMesh(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap);
 
 	bool SetMaterialInstances_StaticMesh(UStaticMesh* StaticMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap);
 
-	bool LoadEssentialMaterials(UMaterialInterface*& OutMasterMaterial, UMaterialInterface*& OutEyeCorneaMaterial, UMaterialInterface*& OutEyeShadowMaterial);
-
 	UMaterialInstance* CastOrCreateMaterialInstance(UMaterialInterface*& MaterialInterface, const FString& BasePath, const FString& MaterialSlotName, UMaterialInterface* ParentMaterial);
 
+	// Create new Material Instance asset
 	UMaterialInstanceConstant* CreateMaterialInstance(UMaterialInterface* ParentMaterial, FString FullPath);
 
 	void MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialNameMap, FString TextureFolderPath);
@@ -47,18 +46,19 @@ protected:
 
 	FString EyeShadowMaterialPath;
 
-	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup|Material Override")
+	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup|Material Setup")
 	TObjectPtr<UMaterialInterface> MasterMaterialOverride;
 
-	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup|Material Override")
-	TObjectPtr<UMaterialInterface> EyeCorneaMaterialOverride;
-
-	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup|Material Override")
-	TObjectPtr<UMaterialInterface> EyeShadowMaterialOverride;
+	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup|Material Setup", meta = (DisplayName = "Custom Material Overrides"))
+	TMap<FName, TObjectPtr<UMaterialInterface>> CustomMaterialMap;
 
 	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup")
 	TMap<FString, FName> TextureTypeToParamName;
 
 	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup")
 	TSet<FString> LinearTextureTypes;
+
+private:
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> MasterMaterial;
 };

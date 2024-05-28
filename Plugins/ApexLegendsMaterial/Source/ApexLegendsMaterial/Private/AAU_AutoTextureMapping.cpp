@@ -19,9 +19,10 @@ UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     , EyeCorneaMaterialPath(TEXT("/ApexLegendsMaterial/Materials/MI_eyecornea"))
     , EyeShadowMaterialPath(TEXT("/ApexLegendsMaterial/Materials/MI_eyeshadow"))
     , MasterMaterialOverride(nullptr)
-    , EyeCorneaMaterialOverride(nullptr)
-    , EyeShadowMaterialOverride(nullptr)
 {
+    // CustomMaterialMap
+    CustomMaterialMap.Empty();
+
     // TextureTypeToParamName
     TextureTypeToParamName.Empty();
 
@@ -47,6 +48,19 @@ UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
 
 void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverride)
 {
+    // Check Master Material
+    MasterMaterial = MasterMaterialOverride;
+    if (!MasterMaterial)
+    {
+        MasterMaterial = Cast<UMaterialInterface>(UEditorAssetLibrary::LoadAsset(MasterMaterialPath));
+        if (!MasterMaterial)
+        {
+            UE_LOG(LogTemp, Error, TEXT("[AutoTextureMapping] Failed to load Master Material"));
+            return;
+        }
+    }
+
+    // Do mapping
     TArray<FAssetData> SelectedAssetDatas = UEditorUtilityLibrary::GetSelectedAssetData();
     for (FAssetData& SelectedAssetData : SelectedAssetDatas)
     {
@@ -81,20 +95,20 @@ void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverri
     }
 }
 
-bool UAAU_AutoTextureMapping::SetMaterialInstances(UObject* Object, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
+bool UAAU_AutoTextureMapping::SetMaterialInstances(UObject* MeshObject, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
 {
     bool bRet = false;
-    if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(Object))
+    if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(MeshObject))
     {
         bRet = SetMaterialInstances_SkeletalMesh(SkeletalMesh, OutMaterialNameMap);
     }
-    else if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(Object))
+    else if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(MeshObject))
     {
         bRet = SetMaterialInstances_StaticMesh(StaticMesh, OutMaterialNameMap);
     }
 
-    // Save Skeletal Mesh
-    const FString ObjectPath = Object->GetPathName();
+    // Save Mesh
+    const FString ObjectPath = MeshObject->GetPathName();
     const FString FilePath = FPaths::GetBaseFilename(ObjectPath, false);
     UEditorAssetLibrary::SaveAsset(FilePath, false);
 
@@ -103,28 +117,14 @@ bool UAAU_AutoTextureMapping::SetMaterialInstances(UObject* Object, TMap<FString
 
 bool UAAU_AutoTextureMapping::SetMaterialInstances_SkeletalMesh(USkeletalMesh* SkeletalMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
 {
-    // Load Essential Materials
-    UMaterialInterface* MasterMaterial = nullptr;
-    UMaterialInterface* EyeCorneaMaterial = nullptr;
-    UMaterialInterface* EyeShadowMaterial = nullptr;
-    if (!LoadEssentialMaterials(MasterMaterial, EyeCorneaMaterial, EyeShadowMaterial))
-    {
-        return false;
-    }
-
     // Set Material Instances
     TArray<FSkeletalMaterial>& MaterialList = SkeletalMesh->GetMaterials();
     for (FSkeletalMaterial& Material : MaterialList)
     {
         FName MaterialSlotName = Material.MaterialSlotName;
-        if (MaterialSlotName.IsEqual(FName("wraith_base_eyecornea")))
+        if (CustomMaterialMap.Contains(MaterialSlotName))
         {
-            Material.MaterialInterface = EyeCorneaMaterial;
-            continue;
-        }
-        if (MaterialSlotName.IsEqual(FName("wraith_base_eyeshadow")))
-        {
-            Material.MaterialInterface = EyeShadowMaterial;
+            Material.MaterialInterface = *CustomMaterialMap.Find(MaterialSlotName);
             continue;
         }
 
@@ -152,28 +152,14 @@ bool UAAU_AutoTextureMapping::SetMaterialInstances_SkeletalMesh(USkeletalMesh* S
 
 bool UAAU_AutoTextureMapping::SetMaterialInstances_StaticMesh(UStaticMesh* StaticMesh, TMap<FString, UMaterialInstance*>& OutMaterialNameMap)
 {
-    // Load Essential Materials
-    UMaterialInterface* MasterMaterial = nullptr;
-    UMaterialInterface* EyeCorneaMaterial = nullptr;
-    UMaterialInterface* EyeShadowMaterial = nullptr;
-    if (!LoadEssentialMaterials(MasterMaterial, EyeCorneaMaterial, EyeShadowMaterial))
-    {
-        return false;
-    }
-
     // Set Material Instances
     TArray<FStaticMaterial>& MaterialList = StaticMesh->GetStaticMaterials();
     for (FStaticMaterial& Material : MaterialList)
     {
         FName MaterialSlotName = Material.MaterialSlotName;
-        if (MaterialSlotName.IsEqual(FName("wraith_base_eyecornea")))
+        if (CustomMaterialMap.Contains(MaterialSlotName))
         {
-            Material.MaterialInterface = EyeCorneaMaterial;
-            continue;
-        }
-        if (MaterialSlotName.IsEqual(FName("wraith_base_eyeshadow")))
-        {
-            Material.MaterialInterface = EyeShadowMaterial;
+            Material.MaterialInterface = *CustomMaterialMap.Find(MaterialSlotName);
             continue;
         }
 
@@ -199,44 +185,6 @@ bool UAAU_AutoTextureMapping::SetMaterialInstances_StaticMesh(UStaticMesh* Stati
     return true;
 }
 
-bool UAAU_AutoTextureMapping::LoadEssentialMaterials(UMaterialInterface*& OutMasterMaterial, UMaterialInterface*& OutEyeCorneaMaterial, UMaterialInterface*& OutEyeShadowMaterial)
-{
-    OutMasterMaterial = MasterMaterialOverride;
-    if (!OutMasterMaterial)
-    {
-        OutMasterMaterial = Cast<UMaterialInterface>(UEditorAssetLibrary::LoadAsset(MasterMaterialPath));
-        if (!OutMasterMaterial)
-        {
-            UE_LOG(LogTemp, Error, TEXT("[AutoTextureMapping] Failed to load Master Material"));
-            return false;
-        }
-    }
-
-    OutEyeCorneaMaterial = EyeCorneaMaterialOverride;
-    if (!OutEyeCorneaMaterial)
-    {
-        OutEyeCorneaMaterial = Cast<UMaterialInterface>(UEditorAssetLibrary::LoadAsset(EyeCorneaMaterialPath));
-        if (!OutEyeCorneaMaterial)
-        {
-            UE_LOG(LogTemp, Error, TEXT("[AutoTextureMapping] Failed to load Eye Cornea Material"));
-            return false;
-        }
-    }
-
-    OutEyeShadowMaterial = EyeShadowMaterialOverride;
-    if (!OutEyeShadowMaterial)
-    {
-        OutEyeShadowMaterial = Cast<UMaterialInterface>(UEditorAssetLibrary::LoadAsset(EyeShadowMaterialPath));
-        if (!OutEyeShadowMaterial)
-        {
-            UE_LOG(LogTemp, Error, TEXT("[AutoTextureMapping] Failed to load Eye Shadow Material"));
-            return false;
-        }
-    }
-
-    return true;
-}
-
 UMaterialInstance* UAAU_AutoTextureMapping::CastOrCreateMaterialInstance(UMaterialInterface*& MaterialInterface, const FString& BasePath, const FString& MaterialSlotName, UMaterialInterface* ParentMaterial)
 {
     UMaterialInstance* MaterialInstance = Cast<UMaterialInstance>(MaterialInterface);
@@ -248,14 +196,12 @@ UMaterialInstance* UAAU_AutoTextureMapping::CastOrCreateMaterialInstance(UMateri
 
         if (UEditorAssetLibrary::DoesAssetExist(MaterialInstanceFullPath))
         {
+            // If Material exists in working folder, use that.
             MaterialInstance = Cast<UMaterialInstance>(UEditorAssetLibrary::LoadAsset(MaterialInstanceFullPath));
         }
         else
         {
-            MaterialInstance = CreateMaterialInstance(
-                ParentMaterial,
-                MaterialInstanceFullPath
-            );
+            MaterialInstance = CreateMaterialInstance(ParentMaterial, MaterialInstanceFullPath);
         }
 
         if (!MaterialInstance)
