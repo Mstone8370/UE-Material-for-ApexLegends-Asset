@@ -17,7 +17,7 @@ class APEXLEGENDSMATERIAL_API UAAU_AutoTextureMapping : public UAssetActionUtili
 public:
 	UAAU_AutoTextureMapping();
 
-	UFUNCTION(CallInEditor, meta = (DisplayName = "[Apex Legends Material] Auto Texture Mapping"))
+	UFUNCTION(CallInEditor, meta = (DisplayName = "[Apex Legends Material] Auto Texture Mapping TEST"))
 	void AutoTextureMapping(UPARAM(DisplayName = "Custom Texture Folder") FString TextureFolderNameOverride);
 
 protected:
@@ -37,17 +37,20 @@ protected:
 
 	void MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialNameMap, FString TextureFolderPath);
 
+	void SetMaterialParamValue(UMaterialInstance* MatInst, const FName& ParamName, FMaterialParameterValue& ParamValue);
+
 	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup")
 	FString DefaultTextureFolderName;
 
 	FString MasterMaterialPath;
 
-	FString EyeCorneaMaterialPath;
-
-	FString EyeShadowMaterialPath;
+	FString MasterMaterialSubsurfacePath;
 
 	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup|Material Setup")
 	TObjectPtr<UMaterialInterface> MasterMaterialOverride;
+
+	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup|Material Setup")
+	TObjectPtr<UMaterialInterface> MasterMaterialOverride_Subsurface;
 
 	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup|Material Setup", meta = (DisplayName = "Custom Material Overrides"))
 	TMap<FName, TObjectPtr<UMaterialInterface>> CustomMaterialMap;
@@ -61,4 +64,7 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInterface> MasterMaterial;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> MasterMaterialSubsurface;
 };

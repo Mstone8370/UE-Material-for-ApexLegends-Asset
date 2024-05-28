@@ -15,9 +15,8 @@
 
 UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     : DefaultTextureFolderName(TEXT("Textures"))
-    , MasterMaterialPath(TEXT("/ApexLegendsMaterial/Materials/M_Master_AlphaMask_Subsurface"))
-    , EyeCorneaMaterialPath(TEXT("/ApexLegendsMaterial/Materials/MI_eyecornea"))
-    , EyeShadowMaterialPath(TEXT("/ApexLegendsMaterial/Materials/MI_eyeshadow"))
+    , MasterMaterialPath(TEXT("/ApexLegendsMaterial/Materials/M_Master_AlphaMask_Anisotropy"))
+    , MasterMaterialSubsurfacePath(TEXT("/ApexLegendsMaterial/Materials/M_Master_AlphaMask_Subsurface"))
     , MasterMaterialOverride(nullptr)
 {
     // CustomMaterialMap
@@ -35,6 +34,7 @@ UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     TextureTypeToParamName.Add(TEXT("opacityMultiplyTexture"), FName("Opacity"));
     TextureTypeToParamName.Add(TEXT("scatterThicknessTexture"), FName("ScatterThickness"));
     TextureTypeToParamName.Add(TEXT("specTexture"), FName("Specular"));
+    TextureTypeToParamName.Add(TEXT("anisoSpecDirTexture"), FName("Anisotropy"));
 
     // LinearTextureTypes
     LinearTextureTypes.Empty();
@@ -44,6 +44,7 @@ UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     LinearTextureTypes.Add(TEXT("cavityTexture"));
     LinearTextureTypes.Add(TEXT("glossTexture"));
     LinearTextureTypes.Add(TEXT("normalTexture"));
+    LinearTextureTypes.Add(TEXT("anisoSpecDirTexture"));
 }
 
 void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverride)
@@ -54,6 +55,17 @@ void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverri
     {
         MasterMaterial = Cast<UMaterialInterface>(UEditorAssetLibrary::LoadAsset(MasterMaterialPath));
         if (!MasterMaterial)
+        {
+            UE_LOG(LogTemp, Error, TEXT("[AutoTextureMapping] Failed to load Master Material"));
+            return;
+        }
+    }
+
+    MasterMaterialSubsurface = MasterMaterialOverride_Subsurface;
+    if (!MasterMaterialSubsurface)
+    {
+        MasterMaterialSubsurface = Cast<UMaterialInterface>(UEditorAssetLibrary::LoadAsset(MasterMaterialSubsurfacePath));
+        if (!MasterMaterialSubsurface)
         {
             UE_LOG(LogTemp, Error, TEXT("[AutoTextureMapping] Failed to load Master Material"));
             return;
@@ -307,12 +319,19 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
         }
 
         UMaterialInstance* TargetMaterialInstance = *InMaterialNameMap.Find(MaterialName);
+        if (ParamName->IsEqual(FName("ScatterThickness")) && MasterMaterialSubsurface)
+        {
+            // Change parent to subsurface material
+            TargetMaterialInstance->Parent = MasterMaterialSubsurface;
+        }
 
-        FMaterialInstanceParameterUpdateContext Context(TargetMaterialInstance);
-        FMaterialParameterInfo ParamInfo(*ParamName);
+        if (ParamName->IsEqual(FName("Anisotropy")))
+        {
+            FMaterialParameterValue AnisoValue(true);
+            SetMaterialParamValue(TargetMaterialInstance, FName("IsAnisotropy"), AnisoValue);
+        }
         FMaterialParameterValue Value(Texture);
-        FMaterialParameterMetadata Data(Value);
-        Context.SetParameterValueEditorOnly(ParamInfo, Data);
+        SetMaterialParamValue(TargetMaterialInstance, *ParamName, Value);
     }
 
     // Save Material Instances
@@ -326,4 +345,12 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
             UEditorAssetLibrary::SaveAsset(FPaths::GetBaseFilename(PathName, false), false);
         }
     }
+}
+
+void UAAU_AutoTextureMapping::SetMaterialParamValue(UMaterialInstance* MatInst, const FName& ParamName, FMaterialParameterValue& ParamValue)
+{
+    FMaterialInstanceParameterUpdateContext Context(MatInst);
+    FMaterialParameterInfo ParamInfo(ParamName);
+    FMaterialParameterMetadata Data(ParamValue);
+    Context.SetParameterValueEditorOnly(ParamInfo, Data);
 }
