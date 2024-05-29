@@ -17,7 +17,7 @@ class APEXLEGENDSMATERIAL_API UAAU_AutoTextureMapping : public UAssetActionUtili
 public:
 	UAAU_AutoTextureMapping();
 
-	UFUNCTION(CallInEditor, meta = (DisplayName = "[Apex Legends Material] Auto Texture Mapping TEST"))
+	UFUNCTION(CallInEditor, meta = (DisplayName = "[Apex Legends Material] Auto Texture Mapping"))
 	void AutoTextureMapping(UPARAM(DisplayName = "Custom Texture Folder") FString TextureFolderNameOverride);
 
 protected:
@@ -37,7 +37,7 @@ protected:
 
 	void MapTexturesToMaterial(TMap<FString, UMaterialInstance*>& InMaterialNameMap, FString TextureFolderPath);
 
-	void SetMaterialParamValue(UMaterialInstance* MatInst, const FName& ParamName, FMaterialParameterValue& ParamValue);
+	void SetMaterialParamValue(UMaterialInstance* MatInst, const FName& ParamName, FMaterialParameterValue ParamValue);
 
 	UPROPERTY(EditAnywhere, Category = "AutoTextureMapping Setup")
 	FString DefaultTextureFolderName;

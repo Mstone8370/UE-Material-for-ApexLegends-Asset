@@ -299,10 +299,14 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
         if (LinearTextureTypes.Contains(TextureType) && Texture->SRGB > 0)
         {
             Texture->SRGB = 0;
-            if (TextureType == TEXT("NormalTexture"))
+            if (TextureType == TEXT("normalTexture"))
             {
                 Texture->LODGroup = TextureGroup::TEXTUREGROUP_WorldNormalMap;
                 Texture->CompressionSettings = TextureCompressionSettings::TC_Normalmap;
+            }
+            if (TextureType == TEXT("anisoSpecDirTexture"))
+            {
+                Texture->Filter = TextureFilter::TF_Nearest;
             }
 
             // Update and save texture
@@ -319,19 +323,25 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
         }
 
         UMaterialInstance* TargetMaterialInstance = *InMaterialNameMap.Find(MaterialName);
+        if (ParamName->IsEqual(FName("Anisotropy")))
+        {
+            SetMaterialParamValue(TargetMaterialInstance, FName("IsAnisotropy"), FMaterialParameterValue(true));
+        }
+        if (ParamName->IsEqual(FName("Opacity")))
+        {
+            SetMaterialParamValue(TargetMaterialInstance, FName("AlbedoAlphaAsOpacityMask"), FMaterialParameterValue(false));
+        }
         if (ParamName->IsEqual(FName("ScatterThickness")) && MasterMaterialSubsurface)
         {
             // Change parent to subsurface material
             TargetMaterialInstance->Parent = MasterMaterialSubsurface;
+            /**
+            * Subsurface and Anisotropy cannot be used together in Unreal Engine's Material.
+            * Due to Subsurface having a higher priority than Anisotropy, disabling Anisotropy.
+            */
+            SetMaterialParamValue(TargetMaterialInstance, FName("IsAnisotropy"), FMaterialParameterValue(false));
         }
-
-        if (ParamName->IsEqual(FName("Anisotropy")))
-        {
-            FMaterialParameterValue AnisoValue(true);
-            SetMaterialParamValue(TargetMaterialInstance, FName("IsAnisotropy"), AnisoValue);
-        }
-        FMaterialParameterValue Value(Texture);
-        SetMaterialParamValue(TargetMaterialInstance, *ParamName, Value);
+        SetMaterialParamValue(TargetMaterialInstance, *ParamName, FMaterialParameterValue(Texture));
     }
 
     // Save Material Instances
@@ -347,7 +357,7 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
     }
 }
 
-void UAAU_AutoTextureMapping::SetMaterialParamValue(UMaterialInstance* MatInst, const FName& ParamName, FMaterialParameterValue& ParamValue)
+void UAAU_AutoTextureMapping::SetMaterialParamValue(UMaterialInstance* MatInst, const FName& ParamName, FMaterialParameterValue ParamValue)
 {
     FMaterialInstanceParameterUpdateContext Context(MatInst);
     FMaterialParameterInfo ParamInfo(ParamName);
