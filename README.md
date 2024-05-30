@@ -96,20 +96,6 @@ This project's Unreal Engine version is ```5.3```
 
 ### Material issues
 
-* Pixelated Artifacts
-
-  If you find pixelated artifacts on metal parts, try overriding the ```MetallicMult``` value in the Material Instance.
-
-  - Artifacts example
-
-![artifact](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/bdb4fe40-12da-4eab-b211-9a0b30bd170c)
-
-![metallic](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/097a5392-b7bb-42b7-9bcb-5b0ba80d1390)
-
-  - Result
-
-![result](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/686efd6a-6c8f-45e9-afa9-0b88fc96555a)
-
 * Hair Color
 
   If the hair color appears as too dark, turn off ```CavityAffectAlbedo``` checkbox or lower the ```CavityPow``` value in the Material Instance.
