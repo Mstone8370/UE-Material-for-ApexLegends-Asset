@@ -8,6 +8,12 @@ A repository for an Unreal Engine plugin containing materials for extracted Apex
 
 (Also includes a Post Process Sharpening Material.)
 
+* Note
+
+    Due to the restriction of Unreal Engine Material, the appearance may not exactly match what is seen in the game.
+
+    A workaround was used to simulate the specular reflection color and made efforts to achieve a similar look.
+
 ## About this repository's UE project
 
 This project file includes my PostProcessVolume setup and the plugin code.
@@ -40,13 +46,19 @@ This project's Unreal Engine version is ```5.3```
 
   The Master Material is located in ```Plugins/ApexLegendsMaterial/Materials```.
 
-  Use ```M_Master_AlphaMask_Subsurface``` for general use (e.g. opaque, subsurface scatter, alpha mask(0 or 1)), but use ```M_Master_AlphaBlend``` if translucent materials are needed.
+  In general, use ```M_Master_AlphaMask```, and for translucent materials, use ```M_Master_AlphaBlend```.
+  
+  There is also ```M_Master_AlphaMask_Subsurface``` for Scatter Thickness maps.
+  
+  The Auto Texture Mapping tool will automatically switch to ```M_Master_AlphaMask_Subsurface``` if a Scatter Thickness map exists.
 
   It is recommended to create instances of these materials and override the settings.
 
-  - For those not using the Auto Texture Mapping tool: Make sure to uncheck sRGB for the AO, cavity, gloss, and alpha mask textures in their respective settings. Set the normal map's ```Texture Group``` to ```WorldNormalMap``` and ```Compression Settings``` to ```Normal map```.
+  - For those not using the Auto Texture Mapping tool: Make sure to uncheck sRGB for the AO, cavity, gloss, and alpha mask textures in texture setting. And set the normal map's ```Texture Group``` to ```WorldNormalMap``` and ```Compression Settings``` to ```Normal map```.
 
-![mat_select](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/8f19c19e-59f3-4963-8fb2-24ea90db1bc7)
+![mat_select](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/c1149d34-2aa7-4d03-accc-1f872c4fe915)
+
+---
 
 * Auto Texture Mapping tool
 
@@ -60,19 +72,21 @@ This project's Unreal Engine version is ```5.3```
 
 ![slotname](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/e26d26cc-2c46-4575-8382-9e0c07ed1aa3)
 
-3. Create a folder in directory where Skeletal Mesh exists, and import all textures to that folder.
+2. Create a folder in directory where Skeletal Mesh exists, and import all textures to that folder.
 
    This tool will search for a folder named ```Textures``` by default, but you can designate another folder if you are texturing recolor skins.
 
 ![texturefoldername](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/d52d34d1-3d51-4cb2-9445-a9e3b1aa81b5)
 
-5. **Save all** assets before running the Auto Texture Mapping tool.
+3. **Save all** assets before running the Auto Texture Mapping tool.
 
-6. Right-click the Skeletal Mesh, and select ```Auto Texture Mapping``` inside the **Scripted Asset Actions**.
+4. Right-click the Skeletal Mesh, and select ```Auto Texture Mapping``` inside the **Scripted Asset Actions**.
 
 ![right-click](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/23e92291-fe78-489c-83ee-39d6d0e8d021)
 
 ![demo_gif](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/c9824a30-231f-4f86-96c0-5ad237994dca)
+
+---
 
 * Auto Texture Mapping tool with **Recolor Skins**
 
@@ -96,20 +110,6 @@ This project's Unreal Engine version is ```5.3```
 
 ### Material issues
 
-* Pixelated Artifacts
-
-  If you find pixelated artifacts on metal parts, try overriding the ```MetallicMult``` value in the Material Instance.
-
-  - Artifacts example
-
-![artifact](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/bdb4fe40-12da-4eab-b211-9a0b30bd170c)
-
-![metallic](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/097a5392-b7bb-42b7-9bcb-5b0ba80d1390)
-
-  - Result
-
-![result](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/686efd6a-6c8f-45e9-afa9-0b88fc96555a)
-
 * Hair Color
 
   If the hair color appears as too dark, turn off ```CavityAffectAlbedo``` checkbox or lower the ```CavityPow``` value in the Material Instance.
@@ -130,7 +130,18 @@ This project's Unreal Engine version is ```5.3```
 
 ## Auto Texture Mapping tool issue
 
-  If the Auto Texture Mapping tool is not working and error logs are printed in the **Output Log**, the reason might be an old reference issue.
+  If the Auto Texture Mapping tool is not working and error logs are printed in the ```Output Log```, the reason might be an old reference issue.
 
   Try deleting all Material Instances connected to the Skeletal Mesh, and in the content browser, right-click the current folder and select ```Fix Up Redirectors``` to fix the old references.
-  
+
+## Experimental Feature
+
+The ```M_Master_AlphaMask``` material has an **Anisotropy** option.
+
+Some resources have all the necessary informations for this feature, resulting in much better outcomes when applied, but in some cases, the necessary information is lacking.
+
+Additionally, **Anisotropy** cannot be used together with **Subsurface**.
+
+Since **Anisotropy** typically does not have a significant impact, it is disabled by default.
+
+However, if you want to use it, you can enable it in the **Material Instance** settings, and in some cases, you might need to directly modify the ```M_Master_AlphaMask``` Material or the ```MF_ApexLegendsMaterial``` Material Function.
