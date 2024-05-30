@@ -307,6 +307,7 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
             if (TextureType == TEXT("anisoSpecDirTexture"))
             {
                 Texture->Filter = TextureFilter::TF_Nearest;
+                Texture->CompressionSettings = TextureCompressionSettings::TC_BC7;
             }
 
             // Update and save texture
