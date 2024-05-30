@@ -138,10 +138,15 @@ This project's Unreal Engine version is ```5.3```
 
 The ```M_Master_AlphaMask``` material has an **Anisotropy** option.
 
-Some resources have all the necessary informations for this feature, resulting in much better outcomes when applied, but in some cases, the necessary information is lacking.
+Some resources have all the necessary informations for anisotropy, resulting in much better outcomes when applied, but in some cases, the necessary information is lacking.
 
 Additionally, **Anisotropy** cannot be used together with **Subsurface**.
 
-Since **Anisotropy** typically does not have a significant impact, it is disabled by default.
+Since anisotropy typically does not have a significant impact, it is disabled by default.
 
 However, if you want to use it, you can enable it in the **Material Instance** settings, and in some cases, you might need to directly modify the ```M_Master_AlphaMask``` Material or the ```MF_ApexLegendsMaterial``` Material Function.
+
+The following images compare the results enabled and disabled the **Anisotropy** option. Please note that these examples show the most pronounced effect. The image on the left is without anisotropy (isotropic), right is anisotropy.
+
+![aniso_diff](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/cfdd9167-eaed-413e-9620-b305fc1c9339)
+
