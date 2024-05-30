@@ -146,7 +146,11 @@ Since anisotropy typically does not have a significant impact, it is disabled by
 
 However, if you want to use it, you can enable it in the **Material Instance** settings, and in some cases, you might need to directly modify the ```M_Master_AlphaMask``` Material or the ```MF_ApexLegendsMaterial``` Material Function.
 
-The following images compare the results enabled and disabled the **Anisotropy** option. Please note that these examples show the most pronounced effect. The image on the left is without anisotropy (isotropic), right is anisotropy.
+The following images compare the results enabled and disabled the **Anisotropy** option.
+
+Please note that these examples show the most pronounced effect.
+
+The image on the left is without anisotropy (isotropic), right is anisotropy.
 
 ![aniso_diff](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/cfdd9167-eaed-413e-9620-b305fc1c9339)
 
