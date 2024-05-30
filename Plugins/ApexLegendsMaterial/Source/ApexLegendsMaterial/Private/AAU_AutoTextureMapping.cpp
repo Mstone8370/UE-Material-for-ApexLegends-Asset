@@ -15,7 +15,7 @@
 
 UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     : DefaultTextureFolderName(TEXT("Textures"))
-    , MasterMaterialPath(TEXT("/ApexLegendsMaterial/Materials/M_Master_AlphaMask_Anisotropy"))
+    , MasterMaterialPath(TEXT("/ApexLegendsMaterial/Materials/M_Master_AlphaMask"))
     , MasterMaterialSubsurfacePath(TEXT("/ApexLegendsMaterial/Materials/M_Master_AlphaMask_Subsurface"))
     , MasterMaterialOverride(nullptr)
 {
@@ -323,10 +323,6 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
         }
 
         UMaterialInstance* TargetMaterialInstance = *InMaterialNameMap.Find(MaterialName);
-        if (ParamName->IsEqual(FName("Anisotropy")))
-        {
-            SetMaterialParamValue(TargetMaterialInstance, FName("IsAnisotropy"), FMaterialParameterValue(true));
-        }
         if (ParamName->IsEqual(FName("Opacity")))
         {
             SetMaterialParamValue(TargetMaterialInstance, FName("AlbedoAlphaAsOpacityMask"), FMaterialParameterValue(false));
@@ -335,11 +331,6 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
         {
             // Change parent to subsurface material
             TargetMaterialInstance->Parent = MasterMaterialSubsurface;
-            /**
-            * Subsurface and Anisotropy cannot be used together in Unreal Engine's Material.
-            * Due to Subsurface having a higher priority than Anisotropy, disabling Anisotropy.
-            */
-            SetMaterialParamValue(TargetMaterialInstance, FName("IsAnisotropy"), FMaterialParameterValue(false));
         }
         SetMaterialParamValue(TargetMaterialInstance, *ParamName, FMaterialParameterValue(Texture));
     }
