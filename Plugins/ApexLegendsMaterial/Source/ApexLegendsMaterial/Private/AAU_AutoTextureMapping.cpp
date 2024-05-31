@@ -5,6 +5,7 @@
 
 #include "Engine/SkinnedAssetCommon.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Internationalization/Regex.h"
 
 #include "Engine/ObjectLibrary.h"
 #include "EditorUtilityLibrary.h"
@@ -35,6 +36,14 @@ UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     TextureTypeToParamName.Add(TEXT("scatterThicknessTexture"), FName("ScatterThickness"));
     TextureTypeToParamName.Add(TEXT("specTexture"), FName("Specular"));
     TextureTypeToParamName.Add(TEXT("anisoSpecDirTexture"), FName("Anisotropy"));
+    TextureTypeToParamName.Add(TEXT("ao"), FName("AO"));
+    TextureTypeToParamName.Add(TEXT("col"), FName("Albedo"));
+    TextureTypeToParamName.Add(TEXT("cvt"), FName("Cavity"));
+    TextureTypeToParamName.Add(TEXT("gls"), FName("Gloss"));
+    TextureTypeToParamName.Add(TEXT("ilm"), FName("Emissive"));
+    TextureTypeToParamName.Add(TEXT("nml"), FName("Normal"));
+    TextureTypeToParamName.Add(TEXT("opa"), FName("Opacity"));
+    TextureTypeToParamName.Add(TEXT("spc"), FName("Specular"));
 
     // LinearTextureTypes
     LinearTextureTypes.Empty();
@@ -45,6 +54,11 @@ UAAU_AutoTextureMapping::UAAU_AutoTextureMapping()
     LinearTextureTypes.Add(TEXT("glossTexture"));
     LinearTextureTypes.Add(TEXT("normalTexture"));
     LinearTextureTypes.Add(TEXT("anisoSpecDirTexture"));
+    LinearTextureTypes.Add(TEXT("ao"));
+    LinearTextureTypes.Add(TEXT("cvt"));
+    LinearTextureTypes.Add(TEXT("gls"));
+    LinearTextureTypes.Add(TEXT("nml"));
+    LinearTextureTypes.Add(TEXT("opa"));
 }
 
 void UAAU_AutoTextureMapping::AutoTextureMapping(FString TextureFolderNameOverride)
@@ -299,7 +313,7 @@ void UAAU_AutoTextureMapping::MapTexturesToMaterial(TMap<FString, UMaterialInsta
         if (LinearTextureTypes.Contains(TextureType) && Texture->SRGB > 0)
         {
             Texture->SRGB = 0;
-            if (TextureType == TEXT("normalTexture"))
+            if (TextureType == TEXT("normalTexture") || TextureType == TEXT("nml"))
             {
                 Texture->LODGroup = TextureGroup::TEXTUREGROUP_WorldNormalMap;
                 Texture->CompressionSettings = TextureCompressionSettings::TC_Normalmap;
