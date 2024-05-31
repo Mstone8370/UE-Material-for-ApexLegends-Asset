@@ -1,6 +1,6 @@
 ![main](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/e2b148e8-2442-4c6a-a16a-719ddd93dcd9)
 
-[Full resolution of render image](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/a56f4c9a-36ba-490d-9cf5-48f8502d537c)
+[Full resolution of render image](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/37fad8cf-3d4f-47fd-9980-e8132b9086fe)
 
 # Unreal Engine Material for Apex Legend Asset
 
