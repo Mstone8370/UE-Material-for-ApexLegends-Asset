@@ -110,6 +110,30 @@ This project's Unreal Engine version is ```5.3```
 
 ### Material issues
 
+* Pixelated Artifacts
+
+  If you find pixelated artifacts, the cause might be the alpha channel of the albedo texture.
+  
+  By default, the alpha channel of the albedo texture is used as an opacity mask, but there can be issues with some alpha channels.
+
+  Therefore, try unchecking the ```AlbedoAlphaAsOpacityMask``` setting in the Material Instance.
+
+  - Artiface example
+
+![artifact](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/757a7d05-4e38-4c2f-8fbc-efbf49eb74a6)
+
+  Alpha channel
+  
+![alphachannel](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/c1f01ef5-938a-4f02-83af-d122c2397618)
+
+  Material Instance setting
+
+![matsetting](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/216d54a0-b167-43f4-99a5-7ddeb43141ad)
+
+  Result
+
+![result](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/e056def3-0a06-490a-9fcb-17fa704e3056)
+
 * Hair Color
 
   If the hair color appears as too dark, turn off ```CavityAffectAlbedo``` checkbox or lower the ```CavityPow``` value in the Material Instance.
@@ -124,7 +148,7 @@ This project's Unreal Engine version is ```5.3```
 
 ![cavity_val](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/bcae8eeb-f033-4854-a12d-2dab2dfd12c2)
 
-  - Result
+  Result
 
 ![hair_result](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/9f5a5f6f-4d75-41da-b121-780601ec09b2)
 
