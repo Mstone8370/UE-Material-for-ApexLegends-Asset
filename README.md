@@ -14,6 +14,8 @@ A repository for an Unreal Engine plugin containing materials for extracted Apex
 
     A workaround was used to simulate the specular reflection color and made efforts to achieve a similar look.
 
+    To represent the specular reflection color, adding a Directional Light and using it as the sunlight is recommended.
+
 ## About this repository's UE project
 
 This project file includes my PostProcessVolume setup and the plugin code.
