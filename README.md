@@ -2,6 +2,9 @@
 
 [Full resolution of render image](https://github.com/Mstone8370/UE-Material-for-ApexLegends-Asset/assets/43489974/37fad8cf-3d4f-47fd-9980-e8132b9086fe)
 
+# This plugin has been suspended.
+  Please use [another plugin](https://github.com/Mstone8370/UE-Substrate-Material-for-ApexLegends-resource) instead.
+
 # Unreal Engine Material for Apex Legend Asset
 
 A repository for an Unreal Engine plugin containing materials for extracted Apex Legends assets and an auto texture mapping tool.
